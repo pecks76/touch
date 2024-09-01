@@ -6,6 +6,8 @@ import (
 	"restservice/domain/account"
 )
 
+//go:generate mockgen -source=pot_persistence.go -destination=mock/pot_persistence.go
+
 type PotRepository interface {
 	ReadPot(id int) account.Pot
 	ReadPotsForDepositId(depositId int) []account.Pot

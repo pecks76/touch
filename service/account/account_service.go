@@ -2,14 +2,13 @@ package account
 
 import (
 	"errors"
-	"log"
 	accountDb "restservice/database/account"
 	"restservice/domain/account"
 )
 
 // all methods
 type AccountService interface {
-	AddToOrCreateAccount(id int, wrapperType string, potId int, amount int)
+	AddToOrCreateAccount(id int, wrapperType string, potId int, amount int) error
 }
 
 // all dependencies
@@ -26,29 +25,28 @@ const SIPP = "SIPP"
 const ISA = "ISA"
 const GIA = "GIA"
 
-func (ac accountService) AddToOrCreateAccount(id int, wrapperType string, potId int, amount int) {
-
-	account := ac.accountRepo.ReadAccount(id)
+func (ac accountService) AddToOrCreateAccount(id int, wrapperType string, potId int, amount int) error {
 
 	accountTypes := []string{SIPP, ISA, GIA}
 	if !contains(accountTypes, wrapperType) {
-		// todo: error handling here
-		// invalid wrapperType
-		// throw error
+		return errors.New("invalid account type")
 	}
 
-	if checkAmount(account, amount, wrapperType) != nil {
-		// todo: error - return error
-		log.Println("Received error, too much money in account")
+	acc := ac.accountRepo.ReadAccount(id)
+
+	if checkAmount(acc, amount, wrapperType) != nil {
+		return errors.New("too much money in account")
 	}
 
-	if account.Id == 0 {
+	if acc.Id == 0 {
 		// check amount
 		ac.accountRepo.InsertAccount(wrapperType, potId, amount)
 	} else {
 		// check amount (existing + instruction)
-		ac.accountRepo.UpdateAccount(account.Id, amount)
+		ac.accountRepo.UpdateAccount(acc.Id, amount)
 	}
+
+	return nil
 }
 
 func contains(s []string, e string) bool {

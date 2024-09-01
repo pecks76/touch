@@ -6,6 +6,8 @@ import (
 	"restservice/domain/receipt"
 )
 
+//go:generate mockgen -source=instruction_persistence.go -destination=mock/instruction_persistence.go
+
 type InstructionRepository interface {
 	InsertInstruction(instruction receipt.Instruction) int
 	ReadInstructionsByDepositId(depositId int) []receipt.Instruction

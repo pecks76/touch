@@ -47,7 +47,10 @@ func (rrs receiptRestService) POST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Received receipt: %+v", payload.Receipt)
-	rrs.receiptService.SaveReceipt(payload.Receipt)
+	err = rrs.receiptService.SaveReceipt(payload.Receipt)
+	if err != nil {
+		http.Error(w, "Failed to save receipt", http.StatusBadRequest)
+	}
 
 	// todo: this is how you print back to the http response
 	// fmt.Fprintf(w, "REST: Received Receipt: %+v\n", payload.Receipt)

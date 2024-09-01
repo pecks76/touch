@@ -7,6 +7,8 @@ import (
 	"restservice/domain/receipt"
 )
 
+//go:generate mockgen -source=deposit_persistence.go -destination=mock/desposit_persistence.go
+
 type DepositRepository interface {
 	InsertDeposit(clientId int, nominal int) int
 	ReadDeposit(id int) receipt.Deposit

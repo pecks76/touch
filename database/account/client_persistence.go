@@ -6,6 +6,8 @@ import (
 	"restservice/domain/account"
 )
 
+//go:generate mockgen -source=client_persistence.go -destination=mock/client_persistence.go
+
 type ClientRepository interface {
 	ReadClient(id int) account.Client
 	InsertClient() int

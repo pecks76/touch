@@ -18,8 +18,6 @@ func (cs clientService) GetOrCreateClient(id int) int {
 
 	client := cs.clientRepo.ReadClient(id)
 
-	// log.Println(client.Id)
-
 	if client.Id == 0 {
 		return cs.clientRepo.InsertClient()
 	} else {
