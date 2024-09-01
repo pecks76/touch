@@ -13,8 +13,8 @@ var (
 func init() {
 
 	var err error
-	// DBConn, err = sql.Open("mysql", "greg:greg@tcp(mysql:3306)/touch")
-	DBConn, err = sql.Open("mysql", "greg:greg@tcp(localhost:3306)/touch")
+	DBConn, err = sql.Open("mysql", "greg:greg@tcp(mysql:3306)/touch")
+	// DBConn, err = sql.Open("mysql", "greg:greg@tcp(localhost:3306)/touch")
 
 	if err != nil {
 		fmt.Println("Error in connecting to database")
