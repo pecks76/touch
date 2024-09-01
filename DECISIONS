@@ -1,0 +1,164 @@
+DECISIONS
+
+* clients only have an id (avoid passing personal info around)
+* pots are an array (you can have many, they are the same)
+* investments are not (you can only have one of each)
+* probably won't validate the JSON (other than by deserializing it) - you might want to do this though? 
+
+* haven't used gin or router for now, may change later - just using net/http for time being 
+* need directory structure, split by function or by domain? 
+
+* what are naming conventions for files?
+
+* the investments could be ints. you would either have to add, or assume, the currency
+
+* there is some common code in Rest services. will leave for now.
+
+* I'm not sure if I should split the accounts out or leave them as is
+
+----------------------------------------------------------------------------------------------
+
+what exactly are the requirements?
+
+* set up one or more deposits
+* records one or more reciepts against a deposit
+
+
+I think actually
+* set up one or more deposits
+- i.e. client + nominal
+
+
+// it should probably generate and return an id, not accept one
+{
+    "deposit" : {
+        "id" : 456,
+        "clientId" : 123,
+        "nominal" : 1000
+    }
+}
+
+
+// nothing here is going to be generated, i.e. just accept names and ids as they are
+{
+    "receipt" : {
+        "depositId" : 456,
+        "pots": [
+            {
+                "name": "A",
+                "GIA" : 1000,
+                "ISA" : 2000,
+                "SIPP": 400
+            },
+            {
+                "name" : "B",
+                "GIA"  : 2000,
+                "ISA"  : 500
+            },
+            {
+                 "name" : "C",
+                 "SIPP" : 2000,
+                 "ISA" :  500
+            }
+        ]
+    }
+}
+
+
+then
+* record receipt:
+- i.e. potA - GIA, ISA, SIPP
+
+---
+
+* database - which one?
+* you'll need something like Flyway to spin up the schema
+
+* Docker
+
+* tests - check the logic at this point
+** unit
+** rest?
+
+* what is the correct way to log ?
+* check the error reporting
+
+
+* post it up on gitlab
+
+----
+
+CURL:
+
+curl -X POST http://localhost:8080/deposit \
+-H "Content-Type: application/json" \
+-d '{
+    "deposit" : {
+        "id" : 456,
+        "clientId" : 123,
+        "nominal" : 1000
+    }
+}'
+
+
+curl -X POST http://localhost:8080/receipt \
+-H "Content-Type: application/json" \
+-d '{
+        "receipt" : {
+            "depositId" : 456,
+            "pots": [
+                {
+                    "name": "A",
+                    "GIA" : 1000,
+                    "ISA" : 2000,
+                    "SIPP": 400
+                },
+                {
+                    "name" : "B",
+                    "GIA"  : 2000,
+                    "ISA"  : 500
+                },
+                {
+                     "name" : "C",
+                     "SIPP" : 2000,
+                     "ISA" :  500
+                }
+            ]
+        }
+    }'
+
+---------------------------------
+
+Deposit table
+
+ints, id, clientId, nominal
+
+actually an id possibly isn't an int
+and it needs to be generated
+
+
+CREATE TABLE `deposit` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `clientId` int NOT NULL,
+  `nominal` int NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+----------
+
+routing - does it work?
+finish the REST as is all the way through
+
+how do you write a test? at what level should you be testing?
+check the logic again at this point
+
+ASK WHEN THEY WANT IT BACK
+
+logging
+error handling
+
+stick in on Gitlab. or hub, whichever.
+
+
+

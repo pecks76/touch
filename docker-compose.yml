@@ -1,0 +1,51 @@
+#version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: touch
+      MYSQL_USER: greg
+      MYSQL_PASSWORD: greg
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+
+  flyway:
+    image: flyway/flyway:9.0.0
+    container_name: flyway-migration
+    command: migrate
+      -url=jdbc:mysql://mysql-db:3306/touch?allowPublicKeyRetrieval=true
+      -user=greg
+      -password=greg
+      -locations=filesystem:/flyway/sql
+    volumes:
+      - ./sql:/flyway/sql
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+  rest-service:
+    build: .
+    container_name: go-rest-service
+    environment:
+      DATABASE_URL: "greg:greg@tcp(mysql:3306)/touch"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - flyway
+    networks:
+      - app-network
+
+volumes:
+  mysql-data:
+
+networks:
+  app-network:
