@@ -6,9 +6,11 @@ import (
 	"restservice/msg"
 )
 
+//go:generate mockgen -source=deposit_service.go -destination=mock/desposit_service.go
+
 type DepositService interface {
 	GetDepositReport(id int) msg.Deposit
-	GetOrCreateDeposit(id int, clientId int, nominal int) int
+	GetOrCreateDeposit(id int, clientId int, nominal int) (int, error)
 }
 
 type depositService struct {
@@ -33,12 +35,12 @@ func (ds depositService) GetDepositReport(id int) msg.Deposit {
 	return depositMsg
 }
 
-func (ds depositService) GetOrCreateDeposit(id int, clientId int, nominal int) int {
+func (ds depositService) GetOrCreateDeposit(id int, clientId int, nominal int) (int, error) {
 
 	deposit := ds.depositRepo.ReadDeposit(id)
 
 	if deposit.Id != 0 {
-		return id
+		return id, nil
 	} else {
 		return ds.depositRepo.InsertDeposit(clientId, nominal)
 	}

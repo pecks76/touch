@@ -6,6 +6,8 @@ import (
 	"restservice/domain/account"
 )
 
+//go:generate mockgen -source=account_service.go -destination=mock/account_service.go
+
 // all methods
 type AccountService interface {
 	AddToOrCreateAccount(id int, wrapperType string, potId int, amount int) error
@@ -38,15 +40,18 @@ func (ac accountService) AddToOrCreateAccount(id int, wrapperType string, potId 
 		return errors.New("too much money in account")
 	}
 
+	var err error
 	if acc.Id == 0 {
-		// check amount
-		ac.accountRepo.InsertAccount(wrapperType, potId, amount)
+		err = ac.accountRepo.InsertAccount(wrapperType, potId, amount)
 	} else {
-		// check amount (existing + instruction)
-		ac.accountRepo.UpdateAccount(acc.Id, amount)
+		err = ac.accountRepo.UpdateAccount(acc.Id, amount)
 	}
 
-	return nil
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
 }
 
 func contains(s []string, e string) bool {

@@ -35,11 +35,12 @@ func (m *MockDepositRepository) EXPECT() *MockDepositRepositoryMockRecorder {
 }
 
 // InsertDeposit mocks base method.
-func (m *MockDepositRepository) InsertDeposit(clientId, nominal int) int {
+func (m *MockDepositRepository) InsertDeposit(clientId, nominal int) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertDeposit", clientId, nominal)
 	ret0, _ := ret[0].(int)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // InsertDeposit indicates an expected call of InsertDeposit.

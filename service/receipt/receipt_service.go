@@ -31,17 +31,28 @@ func NewReceiptService(clientService accountService.ClientService,
 
 func (rc receiptService) SaveReceipt(receipt msg.Receipt) error {
 
-	clientId := rc.clientService.GetOrCreateClient(receipt.ClientId)
-	depositId := rc.depositService.GetOrCreateDeposit(receipt.DepositId, clientId, receipt.Nominal)
+	var clientId int
+	var err error
+	if clientId, err = rc.clientService.GetOrCreateClient(receipt.ClientId); err != nil {
+		return err
+	}
+
+	var depositId int
+	if depositId, err = rc.depositService.GetOrCreateDeposit(receipt.DepositId, clientId, receipt.Nominal); err != nil {
+		return err
+	}
 
 	for _, p := range receipt.Pots {
-		potId := rc.potService.GetOrCreatePot(p.Id, p.Name, clientId, depositId)
+
+		var potId int
+		if potId, err = rc.potService.GetOrCreatePot(p.Id, p.Name, clientId, depositId); err != nil{
+			return err
+		}
 		for _, a := range p.Accounts {
-			err := rc.accountService.AddToOrCreateAccount(a.Id, a.WrapperType, potId, a.Amount)
-			if err != nil {
+			if err = rc.accountService.AddToOrCreateAccount(a.Id, a.WrapperType, potId, a.Amount); err != nil {
 				return err
 			} else {
-				rc.instructionService.saveInstruction(depositId, p.Name, a.WrapperType, a.Amount)
+				return rc.instructionService.saveInstruction(depositId, p.Name, a.WrapperType, a.Amount)
 			}
 		}
 	}

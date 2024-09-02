@@ -35,10 +35,10 @@ func (m *MockAccountRepository) EXPECT() *MockAccountRepositoryMockRecorder {
 }
 
 // InsertAccount mocks base method.
-func (m *MockAccountRepository) InsertAccount(wrapperType string, potId, amount int) int {
+func (m *MockAccountRepository) InsertAccount(wrapperType string, potId, amount int) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertAccount", wrapperType, potId, amount)
-	ret0, _ := ret[0].(int)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 
@@ -63,11 +63,12 @@ func (mr *MockAccountRepositoryMockRecorder) ReadAccount(id interface{}) *gomock
 }
 
 // ReadAccountsByPotId mocks base method.
-func (m *MockAccountRepository) ReadAccountsByPotId(potId int) []account.Account {
+func (m *MockAccountRepository) ReadAccountsByPotId(potId int) ([]account.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadAccountsByPotId", potId)
 	ret0, _ := ret[0].([]account.Account)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // ReadAccountsByPotId indicates an expected call of ReadAccountsByPotId.
@@ -77,9 +78,11 @@ func (mr *MockAccountRepositoryMockRecorder) ReadAccountsByPotId(potId interface
 }
 
 // UpdateAccount mocks base method.
-func (m *MockAccountRepository) UpdateAccount(id, amount int) {
+func (m *MockAccountRepository) UpdateAccount(id, amount int) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "UpdateAccount", id, amount)
+	ret := m.ctrl.Call(m, "UpdateAccount", id, amount)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // UpdateAccount indicates an expected call of UpdateAccount.

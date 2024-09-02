@@ -5,8 +5,10 @@ import (
 	"restservice/domain/receipt"
 )
 
+//go:generate mockgen -source=instruction_service.go -destination=mock/instruction_service.go
+
 type InstructionService interface {
-	saveInstruction(depositId int, potName string, wrapperType string, amount int)
+	saveInstruction(depositId int, potName string, wrapperType string, amount int) error
 }
 
 type instructionService struct {
@@ -17,7 +19,7 @@ func NewInstructionService(instructionRepo receiptDB.InstructionRepository) Inst
 	return &instructionService{instructionRepo: instructionRepo}
 }
 
-func (is instructionService) saveInstruction(depositId int, potName string, wrapperType string, amount int) {
+func (is instructionService) saveInstruction(depositId int, potName string, wrapperType string, amount int) error {
 
 	var instruction = receipt.Instruction{
 		DepositId:   depositId,
@@ -26,9 +28,9 @@ func (is instructionService) saveInstruction(depositId int, potName string, wrap
 		Amount:      amount,
 	}
 
-	is.instructionRepo.InsertInstruction(instruction)
+	return is.instructionRepo.InsertInstruction(instruction)
 }
 
-func (is instructionService) GetInstructionsByDepositId(depositId int) []receipt.Instruction {
-	return is.instructionRepo.ReadInstructionsByDepositId(depositId)
-}
+//func (is instructionService) GetInstructionsByDepositId(depositId int) []receipt.Instruction {
+//	return is.instructionRepo.ReadInstructionsByDepositId(depositId)
+//}

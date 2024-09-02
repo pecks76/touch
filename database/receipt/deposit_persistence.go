@@ -1,6 +1,7 @@
 package receipt
 
 import (
+	"errors"
 	"log"
 	"restservice/database"
 	"restservice/database/account"
@@ -10,7 +11,7 @@ import (
 //go:generate mockgen -source=deposit_persistence.go -destination=mock/desposit_persistence.go
 
 type DepositRepository interface {
-	InsertDeposit(clientId int, nominal int) int
+	InsertDeposit(clientId int, nominal int) (int, error)
 	ReadDeposit(id int) receipt.Deposit
 }
 
@@ -22,18 +23,17 @@ func NewDepositRepository(potRepo account.PotRepository) DepositRepository {
 	return &depositRepository{potRepo: potRepo}
 }
 
-func (dr depositRepository) InsertDeposit(clientId int, nominal int) int {
+func (dr depositRepository) InsertDeposit(clientId int, nominal int) (int, error) {
 	// we need to use this pattern to get the Id back out
 	stmt, _ := database.DBConn.Prepare("INSERT INTO deposit(clientId, nominal) VALUES (?,?)")
 	res, err := stmt.Exec(clientId, nominal)
 
 	if err != nil {
-		// todo: logging
-		log.Println("Failed to create deposit")
+		return 0, errors.New("failed to create deposit")
 	}
 
 	id, _ := res.LastInsertId()
-	return int(id)
+	return int(id), nil
 }
 
 
@@ -49,7 +49,10 @@ func (dr depositRepository) ReadDeposit(id int) receipt.Deposit {
 		log.Println("Failed to read deposit")
 	}
 
-	pots := dr.potRepo.ReadPotsForDepositId(deposit.Id)
+	pots, err := dr.potRepo.ReadPotsForDepositId(deposit.Id)
+	if err != nil {
+		log.Println(err)
+	}
 	deposit.Pots = pots
 	log.Printf("deposit.Pots: %+v", deposit.Pots)
 

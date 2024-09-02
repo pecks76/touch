@@ -1,6 +1,7 @@
 package account
 
 import (
+	"errors"
 	"log"
 	"restservice/database"
 	"restservice/domain/account"
@@ -10,9 +11,9 @@ import (
 
 type AccountRepository interface {
 	ReadAccount(id int) account.Account
-	ReadAccountsByPotId(potId int) []account.Account
-	InsertAccount(wrapperType string, potId int, amount int) int
-	UpdateAccount(id int, amount int)
+	ReadAccountsByPotId(potId int) ([]account.Account, error)
+	InsertAccount(wrapperType string, potId int, amount int) error
+	UpdateAccount(id int, amount int) error
 }
 
 type accountRepository struct {
@@ -25,25 +26,25 @@ func NewAccountRepository() AccountRepository {
 
 func (ar accountRepository) ReadAccount(id int) account.Account {
 
-	var account account.Account
+	var acc = account.Account{Id: 0}
 
 	err := database.DBConn.QueryRow("SELECT id, wrapper_type, potId, amount "+
 		"FROM account "+
-		"WHERE id = ?", id).Scan(&account.Id, &account.WrapperType, &account.PotId, &account.Amount)
+		"WHERE id = ?", id).Scan(&acc.Id, &acc.WrapperType, &acc.PotId, &acc.Amount)
 
 	if err != nil {
-		// todo: logging
 		log.Println("Failed to read account")
 	}
 
-	return account
+	return acc
 }
 
-func (ar accountRepository) ReadAccountsByPotId(potId int) []account.Account {
+func (ar accountRepository) ReadAccountsByPotId(potId int) ([]account.Account, error) {
 
 	rows, err := database.DBConn.Query("SELECT id, wrapper_type, potId, amount FROM account WHERE potID = ?", potId)
+
 	if err != nil {
-		log.Println("Failed to get accounts by pot id ")
+		return nil, errors.New("failed to get accounts by pot id")
 	}
 
 	var accounts []account.Account
@@ -53,32 +54,28 @@ func (ar accountRepository) ReadAccountsByPotId(potId int) []account.Account {
 		accounts = append(accounts, acc)
 	}
 
-	// todo: there is not enough error checking going on here
-
-	return accounts
+	return accounts, nil
 }
 
-func (ar accountRepository) InsertAccount(wrapperType string, potId int, amount int) int {
+func (ar accountRepository) InsertAccount(wrapperType string, potId int, amount int) error {
 
-	// we need to use this pattern to get the Id back out
 	stmt, _ := database.DBConn.Prepare("INSERT INTO account(wrapper_type, potId, amount) VALUES (?,?,?)")
-	res, err := stmt.Exec(wrapperType, potId, amount)
+	_, err := stmt.Exec(wrapperType, potId, amount)
 
 	if err != nil {
-		// todo: this is definitely an error
-		log.Println("Failed to create account")
+		return errors.New("failed to create account")
 	}
 
-	id, _ := res.LastInsertId()
-	return int(id)
+	return nil
 }
 
-func (ar accountRepository) UpdateAccount(id int, amount int) {
+func (ar accountRepository) UpdateAccount(id int, amount int) error {
 
 	_, err := database.DBConn.Query("UPDATE account SET amount = ? WHERE id = ?", amount, id)
 
 	if err != nil {
-		// todo: this is definitely an error
-		log.Println("Failed to update account")
+		return errors.New("failed to update account")
 	}
+
+	return nil
 }

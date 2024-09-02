@@ -1,6 +1,7 @@
 package account
 
 import (
+	"errors"
 	"log"
 	"restservice/database"
 	"restservice/domain/account"
@@ -10,7 +11,7 @@ import (
 
 type ClientRepository interface {
 	ReadClient(id int) account.Client
-	InsertClient() int
+	InsertClient() (int, error)
 }
 
 type clientRepository struct {
@@ -36,18 +37,16 @@ func (cr clientRepository) ReadClient(id int) account.Client {
 	return client
 }
 
-func (cr clientRepository) InsertClient() int {
+func (cr clientRepository) InsertClient() (int, error) {
 
 	// we need to use this pattern to get the Id back out
 	stmt, _ := database.DBConn.Prepare("INSERT INTO client values()")
 	res, err := stmt.Exec()
 
 	if err != nil {
-		log.Println("Failed to create client")
+		return 0, errors.New("failed to read client")
 	}
 
-	// todo: error checking here
-	log.Printf("%+v", res)
 	id, _ :=  res.LastInsertId()
-	return int(id)
+	return int(id), nil
 }

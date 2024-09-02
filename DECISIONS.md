@@ -17,6 +17,8 @@
 * use DI to make testing easier
 * used mockgen for mocking
 
+* generally it tries to log errors and keep going, rather than bailing out 
+
 
 
 

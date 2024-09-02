@@ -35,11 +35,12 @@ func (m *MockPotRepository) EXPECT() *MockPotRepositoryMockRecorder {
 }
 
 // InsertPot mocks base method.
-func (m *MockPotRepository) InsertPot(name string, clientId, depositId int) int {
+func (m *MockPotRepository) InsertPot(name string, clientId, depositId int) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertPot", name, clientId, depositId)
 	ret0, _ := ret[0].(int)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // InsertPot indicates an expected call of InsertPot.
@@ -63,11 +64,12 @@ func (mr *MockPotRepositoryMockRecorder) ReadPot(id interface{}) *gomock.Call {
 }
 
 // ReadPotsForDepositId mocks base method.
-func (m *MockPotRepository) ReadPotsForDepositId(depositId int) []account.Pot {
+func (m *MockPotRepository) ReadPotsForDepositId(depositId int) ([]account.Pot, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadPotsForDepositId", depositId)
 	ret0, _ := ret[0].([]account.Pot)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // ReadPotsForDepositId indicates an expected call of ReadPotsForDepositId.

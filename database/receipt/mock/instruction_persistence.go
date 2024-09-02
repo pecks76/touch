@@ -35,10 +35,10 @@ func (m *MockInstructionRepository) EXPECT() *MockInstructionRepositoryMockRecor
 }
 
 // InsertInstruction mocks base method.
-func (m *MockInstructionRepository) InsertInstruction(instruction receipt.Instruction) int {
+func (m *MockInstructionRepository) InsertInstruction(instruction receipt.Instruction) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertInstruction", instruction)
-	ret0, _ := ret[0].(int)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 

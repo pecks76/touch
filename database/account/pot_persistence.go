@@ -1,6 +1,7 @@
 package account
 
 import (
+	"errors"
 	"log"
 	"restservice/database"
 	"restservice/domain/account"
@@ -10,8 +11,8 @@ import (
 
 type PotRepository interface {
 	ReadPot(id int) account.Pot
-	ReadPotsForDepositId(depositId int) []account.Pot
-	InsertPot(name string, clientId int, depositId int) int
+	ReadPotsForDepositId(depositId int) ([]account.Pot, error)
+	InsertPot(name string, clientId int, depositId int) (int, error)
 }
 
 type potRepository struct {
@@ -22,7 +23,7 @@ func NewPotRepository(accountRepo AccountRepository ) PotRepository {
 	return &potRepository{accountRepo: accountRepo}
 }
 
-func (pr potRepository) ReadPot(id int) account.Pot {
+func (pr potRepository) ReadPot(id int) account.Pot{
 
 	var pot account.Pot
 
@@ -32,23 +33,25 @@ func (pr potRepository) ReadPot(id int) account.Pot {
 
 	if err != nil {
 		log.Println("Failed to read pot")
-		// what to do at this point?
+		return pot
 	}
 
-	accounts := pr.accountRepo.ReadAccountsByPotId(id)
+	accounts, err := pr.accountRepo.ReadAccountsByPotId(id)
+	if err != nil {
+		log.Println(err)
+	}
 	pot.Accounts = accounts
 
 	return pot
 
 }
 
-func (pr potRepository) ReadPotsForDepositId(depositId int) []account.Pot {
+func (pr potRepository) ReadPotsForDepositId(depositId int) ([]account.Pot, error) {
 
 	rows, err := database.DBConn.Query("SELECT id, name, clientId, depositId FROM pot WHERE depositId = ?", depositId)
 
 	if err != nil {
-		log.Println("Failed to get pots by deposit id ")
-		log.Printf("%+v", err)
+		return nil, errors.New("failed to get pots by deposit id")
 	}
 
 	var pots []account.Pot
@@ -56,27 +59,29 @@ func (pr potRepository) ReadPotsForDepositId(depositId int) []account.Pot {
 		var pot account.Pot
 		rows.Scan(&pot.Id, &pot.Name, &pot.ClientId, &pot.DepositId)
 
-		accounts := pr.accountRepo.ReadAccountsByPotId(pot.Id)
+		accounts, err := pr.accountRepo.ReadAccountsByPotId(pot.Id)
+		if err != nil {
+			return nil, errors.New("failed to get accounts by pot id")
+		}
 		pot.Accounts = accounts
 
 		pots = append(pots, pot)
 	}
 
-	return pots
+	return pots, nil
 
 }
 
-func (pr potRepository) InsertPot(name string, clientId int, depositId int) int {
+func (pr potRepository) InsertPot(name string, clientId int, depositId int) (int, error) {
 
 	// we need to use this pattern to get the Id back out
 	stmt, _ := database.DBConn.Prepare("INSERT INTO pot(name, clientId, depositId) VALUES (?,?,?)")
 	res, err := stmt.Exec(name, clientId, depositId)
 
 	if err != nil {
-		// todo: logging
-		log.Printf("Failed to create pot: %+v", err)
+		return 0, errors.New("failed to create pot")
 	}
 
 	id, _ := res.LastInsertId()
-	return int(id)
+	return int(id), nil
 }

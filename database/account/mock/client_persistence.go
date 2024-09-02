@@ -35,11 +35,12 @@ func (m *MockClientRepository) EXPECT() *MockClientRepositoryMockRecorder {
 }
 
 // InsertClient mocks base method.
-func (m *MockClientRepository) InsertClient() int {
+func (m *MockClientRepository) InsertClient() (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertClient")
 	ret0, _ := ret[0].(int)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // InsertClient indicates an expected call of InsertClient.

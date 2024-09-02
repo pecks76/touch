@@ -21,7 +21,10 @@ func NewDepositRestService(depositService receipt.DepositService) DepositRestSer
 
 func (drs depositRestService) GET(w http.ResponseWriter, r *http.Request) {
 
-	// todo: check that this is a GET
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
