@@ -30,7 +30,3 @@ func (is instructionService) saveInstruction(depositId int, potName string, wrap
 
 	return is.instructionRepo.InsertInstruction(instruction)
 }
-
-//func (is instructionService) GetInstructionsByDepositId(depositId int) []receipt.Instruction {
-//	return is.instructionRepo.ReadInstructionsByDepositId(depositId)
-//}

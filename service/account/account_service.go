@@ -8,17 +8,14 @@ import (
 
 //go:generate mockgen -source=account_service.go -destination=mock/account_service.go
 
-// all methods
 type AccountService interface {
 	AddToOrCreateAccount(id int, wrapperType string, potId int, amount int) error
 }
 
-// all dependencies
 type accountService struct {
 	accountRepo accountDb.AccountRepository
 }
 
-// constructor takes dependency and returns concrete impl, as Interface
 func NewAccountService(repo accountDb.AccountRepository) AccountService {
 	return &accountService{accountRepo: repo}
 }
